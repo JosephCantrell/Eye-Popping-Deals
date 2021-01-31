@@ -1,5 +1,6 @@
 import time
 import numpy as np
+import argparse
 from selenium.webdriver.chrome.options import Options
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
@@ -12,10 +13,11 @@ import csv
 driver = webdriver.Chrome(ChromeDriverManager().install())
 
 class Scrape:
-    def __init__(self):
+    def __init__(self, args):
             self.options = self.browser_options()
             self.wait = WebDriverWait(driver, 30)
             driver.maximize_window()
+            self.args = args
 
 
     def browser_options(self):
@@ -142,13 +144,20 @@ class Scrape:
         # Sleep for 10 seconds
         time.sleep(10)
         # Click on upcoming deals checkmark
-        driver.find_element_by_xpath('//*[@id="ac-promohub-promo-filter"]/div/div[2]/span/div/label/i').click()
-        time.sleep(1)
+        if args.upcoming:
+            driver.find_element_by_xpath('//*[@id="ac-promohub-promo-filter"]/div/div[2]/span/div/label/i').click()
+            time.sleep(1)
         # Start scrolling
         self.scroll()
 
         print('Found and wrote %d promo items' % len(promo_items))
 
+
+parser = argparse.ArgumentParser(description='Linkedin Automatic Job Applications')
+parser.add_argument('-u','--upcoming', help='Enable upcoming deals', required=False, action='store_true',default=False)
+args = parser.parse_args()
+
+print(args.upcoming)
         
-bot = Scrape()
+bot = Scrape(args)
 bot.run(url)

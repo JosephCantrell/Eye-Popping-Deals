@@ -33,6 +33,13 @@ OR
 scrape.py
 ```
 
+### Parameters  
+
+```
+-h for parameter help
+-u Enables upcoming deals
+```
+
 ## Functions
 
 ### Run Function
@@ -112,7 +119,7 @@ returnString : The manipulated string that the bot needs
 
 The bot will begin by attempting to visit the URL listed in the config file.
 The bot then gets redirected to the login screen where it will  automatically log the user in.
-After this it sleeps for 10 seconds, checks the upcoming checkbox and begins scrolling
+After this it sleeps for 10 seconds, checks the upcoming checkbox, if -u is enabled, and begins scrolling
 Scrolling will continue until the bot finds the bottom of the infinite scrolling element. While
 scrolling, the bot saves every 10 items (how many load per scroll refresh) to the `data.csv` file.
 
