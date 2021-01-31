@@ -146,7 +146,7 @@ VR EMPIRE,10.0%,3/3,10Y5NAAY,https://www.amazon.com/promocode/*Removed for Githu
 VR EMPIRE,10.0%,3/3,107UNQZ8,https://www.amazon.com/promocode/*Removed for Github*
 ```
 
-###Results
+## Results
 After around 4 hours of autonomous use and slow internet, which I eventually was disconnected from,
 the bot stored 1097KB of data, or 14270 Data Points, which included company name, discount percentages,
 end date, discount code and product link
