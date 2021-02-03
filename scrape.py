@@ -6,6 +6,7 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
+import winsound
 from config import url, infiniteScrollTimeout, username, password 
 
 import csv
@@ -54,6 +55,8 @@ class Scrape:
         # Find the email element and put the stored email in the text field
         select_username = driver.find_element_by_xpath('//*[@id="ap_email"]')
         select_username.send_keys(username)
+        
+        currentURL = driver.current_url
 
         # Find the Password element and put the stored password in the text field
         select_password = driver.find_element_by_xpath('//*[@id="ap_password"]')
@@ -62,7 +65,14 @@ class Scrape:
         select_password.send_keys(Keys.ENTER)
         
         time.sleep(5)
+        
+        
         print('Finished login')
+        
+    def check_target_url(self, targetURL):
+        if driver.current_url == targetURL:
+            return True
+        return False
         
     def scroll(self):
         # Value that is passed to find_promo
@@ -73,10 +83,13 @@ class Scrape:
         timeout = infiniteScrollTimeout
         # The counter that counts how many long it has been since the page source hasnt changed
         noChange = 0
-        # Set the initial previous source
-        prevSource = driver.page_source
+        
+        # Changed from page source comparing to comparing the length of the elements that we are looking for. 
+        # Find the promo_box and get the number of elements on screen.
+        promo_box = driver.find_element_by_xpath('//*[@id="ac-promohub-mpc-content"]/div[1]/div[2]')
+        prev_element_len = len(promo_box.find_elements_by_class_name('a-link-normal'))
         # Init current source to empty
-        currentSource = ''
+        current_element_len = ''
         # Delay just incase
         time.sleep(5)
         # Scroll to the bottom
@@ -84,10 +97,13 @@ class Scrape:
         while True:
             # Do the initial pause 
             time.sleep(pause)
-            # Update the current source
-            currentSource = driver.page_source
-            if prevSource != currentSource:
-                # Our source code doesnt match so the infinite scrolling added more items, so scroll to the bottom
+            
+            # Changed from page source comparing to comparing the length of the elements that we are looking for.
+            # Have to find the promo_box each time
+            promo_box = driver.find_element_by_xpath('//*[@id="ac-promohub-mpc-content"]/div[1]/div[2]')
+            current_element_len = len(promo_box.find_elements_by_class_name('a-link-normal'))
+            if prev_element_len != current_element_len:
+                # Our number of elements doesnt match, the infinite scrolling added more items, so scroll to the bottom
                 driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
                 # Reset the counter
                 noChange = 0
@@ -95,17 +111,19 @@ class Scrape:
                 time.sleep(1)
                 # Set the previous length (number of code elements on screen currently) to the return value of find_promo
                 prev_length = self.find_promo(prev_length)
+                # Print out how many we have found while actively searching
+                print('Found and wrote %d promo items' % prev_length)
             else:
                 # There has been no change detected, start incrementing the counter
-                print('inc no change: %d' % noChange)
+                print('No New Items in %d seconds' % noChange)
                 noChange += 1
             if noChange == timeout:
                 # If we detected no change for the timeout time, exit the loop and quit the code
                 print('After %d second pause, we have reached the bottom' % timeout)
                 break;
                 
-            # Set the previous source to the current source
-            prevSource = currentSource
+            # Set the previous length to the current length
+            prev_element_len = current_element_len
 
 
     def find_promo(self, start_length):
@@ -150,14 +168,13 @@ class Scrape:
         # Start scrolling
         self.scroll()
 
-        print('Found and wrote %d promo items' % len(promo_items))
+        
 
 
 parser = argparse.ArgumentParser(description='Linkedin Automatic Job Applications')
 parser.add_argument('-u','--upcoming', help='Enable upcoming deals', required=False, action='store_true',default=False)
 args = parser.parse_args()
 
-print(args.upcoming)
         
 bot = Scrape(args)
 bot.run(url)
